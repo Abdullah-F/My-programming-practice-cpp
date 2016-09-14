@@ -9,10 +9,10 @@ using namespace std;
 int main() {
     int size ;
      
-    int left = 0 , right = 0 , top = 0 , bottom = 0 , tp_r = 0 , tp_l = 0 ,bt_l =0 ,bt_r;
+    int left = 1 , right = 1 , top = 1 , bottom = 1 , tp_r = 1 , tp_l = 1 ,bt_l =1 ,bt_r=1;
     int lefti = 0 , righti = 0 , topi = 0 , bottomi = 0;
     int tri = 0 , trj = 0 , tli = 0 , tlj = 0,bli = 0 , blj = 0,bri = 0 , brj = 0;
-    int answer = 1000;
+    int answer = 0;
     cin >> size;
     
     char** input_grid = new char*[size];
@@ -127,14 +127,14 @@ int main() {
              
         }
             
-               if(top < 1 || bottom < 1 || right < 1 || left < 1 || tp_r < 1 || tp_l < 1 || bt_l < 1 || bt_r<1)
+               if(top < 2 || bottom < 2 || right < 2 || left < 2 || tp_r < 2 || tp_l < 2 || bt_l < 2 || bt_r< 2)
             {
                 top = bottom =left =right = tp_r = tp_l  = bt_l=bt_r =0;
             }
             else{
                 int maxi = max(max(max(max(max(max(top,bottom),max(left,right)),tp_r),tp_l),bt_l),bt_r);
-                
-                if(maxi <= answer)
+             
+                if(maxi >= answer)
                 {
                     answer = maxi;
                 }
@@ -146,9 +146,8 @@ int main() {
             
     }
     
-    if(answer != 1000)
+    
     cout << answer << endl;
-    else cout << 0 << endl;
         
     return 0;
 }
