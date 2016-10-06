@@ -34,9 +34,10 @@ T * insert(T * root, int value) {// note : "only inserts distinct values."
             root->right->right = nullptr;
             return root; //returns the parent of the inserted node
         }
-        insert(root->right, value); //just go right one more
-
-    } else {
+           
+        return  insert(root->right, value); //just go right one more
+    }   
+       
         if (!root->left) {
             root->left = new T();
             root->left->data = value;
@@ -45,9 +46,7 @@ T * insert(T * root, int value) {// note : "only inserts distinct values."
             root->left->left = nullptr;
             return root; //return the parent of the new inserted node
         }
-        insert(root->left, value); //go left one more
-    }
-
+    return insert(root->left, value); //go left one more
 }
 
 node* find(node* root, int value) {// if not found it returns a pointer to the appropriate position where it can be inserted.
@@ -67,7 +66,7 @@ void inOrder(T *root) {
         return;
     inOrder(root->left);
     cout << root->data << " ";
-    cout << root->height << " ";
+    cout << root->height << " " << endl;
     inOrder(root->right);
 
 }
@@ -299,17 +298,14 @@ int main() {
     int size, value;
 
     cin >> size;
-    cin >> value;
-
-    insert_AVL(tree, value);
-
-    while (size > 1) {
+    
+    while (size > 0) {
         cin >> value;
         insert_AVL(tree, value);
         size--;
     }
 
     inOrder(tree);
-    cout << endl << tree->data << endl;
+    cout << "root  :  " << tree->data << endl;
     return 0;
 }

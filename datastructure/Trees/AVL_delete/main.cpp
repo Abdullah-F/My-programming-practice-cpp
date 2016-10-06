@@ -13,7 +13,6 @@ typedef struct node {
     node * left;
     node * right;
 } node;
-
 template<typename T>
 T * insert(T * root, int value) {// note : "only inserts distinct values."
     if (!root) {
@@ -22,7 +21,7 @@ T * insert(T * root, int value) {// note : "only inserts distinct values."
         root->parent = nullptr;
         root->left = nullptr;
         root->right = nullptr;
-        return root;
+        return root;//return the first inserted node as root
     }
 
     if (value > root ->data) {
@@ -34,9 +33,10 @@ T * insert(T * root, int value) {// note : "only inserts distinct values."
             root->right->right = nullptr;
             return root; //returns the parent of the inserted node
         }
-        insert(root->right, value); //just go right one more
-
-    } else {
+           
+        return  insert(root->right, value); //just go right one more
+    }   
+       
         if (!root->left) {
             root->left = new T();
             root->left->data = value;
@@ -45,9 +45,7 @@ T * insert(T * root, int value) {// note : "only inserts distinct values."
             root->left->left = nullptr;
             return root; //return the parent of the new inserted node
         }
-        insert(root->left, value); //go left one more
-    }
-
+    return insert(root->left, value); //go left one more
 }
 
 node* find(node* root, int value) {// if not found it returns a pointer to the appropriate position where it can be inserted.
@@ -108,7 +106,7 @@ void rangeSearch(int min, int max, node* root) {
 
 }
 
-void delete_node(node* node_to_be_deleted) {
+void delete_node(node* node_to_be_deleted) {// not error free --(the "delete_node_avl_version" is error free)--
     if (!node_to_be_deleted->right) {
         if (node_to_be_deleted->parent->left->data == node_to_be_deleted->data) {
             node_to_be_deleted->parent->left = node_to_be_deleted->left;
@@ -150,17 +148,17 @@ node* delete_node_avl_version(node(*(&root)),node* node_to_be_deleted) {//works 
         }else if(!node_to_be_deleted->parent && node_to_be_deleted->left)
         {
             root = node_to_be_deleted->left;
-            return nullptr;
+            return nullptr;// return the parent of the deleted node
         }
         else if(!node_to_be_deleted->parent && !node_to_be_deleted->left)
-            return nullptr;
+            return nullptr;//returns the parent of the deleted node
         
-        return node_to_be_deleted->parent;
+        return node_to_be_deleted->parent;//returns the parent of the deleted node
 
     } else {
-        node* next_node = next(node_to_be_deleted);
-        node_to_be_deleted->data = next_node->data;
-       return  delete_node_avl_version(root,next_node);
+        node* next_node = next(node_to_be_deleted);//find next element to be deleted
+        node_to_be_deleted->data = next_node->data;//replace the deleted node with its next
+       return  delete_node_avl_version(root,next_node);//delete next value (since it is now duplicate value.).
 
     }
 }
@@ -314,7 +312,7 @@ void rebalance(node(*(&root)), node* balancing_starting_point) {
         rebalance_left(root, balancing_starting_point);
     }
 
-    adjust_height(balancing_starting_point);// to be better but it in an else statement after the above conditions.
+    adjust_height(balancing_starting_point);// to be better put it in an else statement after the above conditions.
     
     if (parent)
         rebalance(root, parent);
