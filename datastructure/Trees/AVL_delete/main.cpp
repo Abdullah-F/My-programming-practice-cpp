@@ -1,7 +1,7 @@
 #include<iostream>
 #include <algorithm>
 using namespace std;
-
+// many functions here works under the assumption that all values are distinct in the tree.
 typedef struct node {
 
     node() {
@@ -15,7 +15,7 @@ typedef struct node {
 } node;
 
 template<typename T>
-T * insert(T * root, int value) {
+T * insert(T * root, int value) {// note : "only inserts distinct values."
     if (!root) {
         root = new T();
         root->data = value;
@@ -72,13 +72,13 @@ void inOrder(T *root) {
 
 }
 
-node* left_descendant(node* right_node) {
+node* left_descendant(node* right_node) {//used in the next function
     if (right_node->left)
         return left_descendant(right_node->left);
     return right_node;
 }
 
-node* right_ancestor(node* previous_node) {
+node* right_ancestor(node* previous_node) {//used in the nex() function.
     node* ancestor = previous_node->parent;
 
     while (ancestor && previous_node->data > ancestor->data)
@@ -128,10 +128,16 @@ void delete_node(node* node_to_be_deleted) {
     }
 }
 
-
-node* delete_node_avl_version(node* node_to_be_deleted) {
+node* delete_node_avl_version(node(*(&root)),node* node_to_be_deleted) {//works fine whiout errors, but needs more
+    //testing
     if (!node_to_be_deleted->right) {
-        if (node_to_be_deleted->parent->left->data == node_to_be_deleted->data) {
+        
+        if(node_to_be_deleted->parent){
+            
+        if (node_to_be_deleted->parent->left&&
+                (node_to_be_deleted->parent->left->data == 
+                node_to_be_deleted->data)) {
+            
             node_to_be_deleted->parent->left = node_to_be_deleted->left;
             if (node_to_be_deleted->left)
                 node_to_be_deleted->left->parent = node_to_be_deleted->parent;
@@ -141,16 +147,26 @@ node* delete_node_avl_version(node* node_to_be_deleted) {
                 node_to_be_deleted->left->parent = node_to_be_deleted->parent;
         }
         
+        }else if(!node_to_be_deleted->parent && node_to_be_deleted->left)
+        {
+            root = node_to_be_deleted->left;
+            return nullptr;
+        }
+        else if(!node_to_be_deleted->parent && !node_to_be_deleted->left)
+            return nullptr;
+        
         return node_to_be_deleted->parent;
+
     } else {
         node* next_node = next(node_to_be_deleted);
         node_to_be_deleted->data = next_node->data;
-        return delete_node_avl_version(next_node);
+       return  delete_node_avl_version(root,next_node);
 
     }
 }
 
-void rotate_right(node(*(&root)), node *to_be_rotated) {
+
+void rotate_right(node(*(&root)), node *to_be_rotated) {//well tested.
     if (!to_be_rotated)
         return;
     else if (!to_be_rotated->left)
@@ -181,7 +197,7 @@ void rotate_right(node(*(&root)), node *to_be_rotated) {
 
 }
 
-void rotate_left(node(*(&root)), node *to_be_rotated) {
+void rotate_left(node(*(&root)), node *to_be_rotated) {//well tested
     if (!to_be_rotated)
         return;
     else if (!to_be_rotated->right)
@@ -209,7 +225,7 @@ void rotate_left(node(*(&root)), node *to_be_rotated) {
     to_be_rotated_right->left = to_be_rotated;
 }
 
-void adjust_height(node* to_be_height_adjusted) {
+void adjust_height(node* to_be_height_adjusted) {//well tested
 
     if (to_be_height_adjusted->left && to_be_height_adjusted->right)
         to_be_height_adjusted->height = 1 + max(to_be_height_adjusted->left->height,
@@ -236,7 +252,7 @@ void rebalance_left(node(*(&root)), node* node_to_be_balanced) {
             }
         } else if (!node_to_be_balanced_right->right && node_to_be_balanced_right->left) {
             
-                rotate_right(root, node_to_be_balanced);
+                rotate_right(root, node_to_be_balanced_right);
                 adjust_height(node_to_be_balanced_right);
                 adjust_height(node_to_be_balanced_right->parent);
             
@@ -279,7 +295,7 @@ void rebalance_right(node(*(&root)), node* node_to_be_balanced) {
 
 void rebalance(node(*(&root)), node* balancing_starting_point) {
     node* parent = balancing_starting_point->parent;
-
+    //well tested function.
     if (balancing_starting_point->left && balancing_starting_point->right) {
         if (balancing_starting_point->left->height >
                 balancing_starting_point->right->height + 1)
@@ -298,7 +314,7 @@ void rebalance(node(*(&root)), node* balancing_starting_point) {
         rebalance_left(root, balancing_starting_point);
     }
 
-    adjust_height(balancing_starting_point);
+    adjust_height(balancing_starting_point);// to be better but it in an else statement after the above conditions.
     
     if (parent)
         rebalance(root, parent);
@@ -306,32 +322,30 @@ void rebalance(node(*(&root)), node* balancing_starting_point) {
 
 }
 
-node* insert_AVL(node(*(&root)), int value) {
+void insert_AVL(node(*(&root)), int value) {
     if (root)
         insert(root, value);
-    else return insert(root, value);
+    else root =  insert(root, value);// if tree is empty create a head .
 
     node* balance_starting_node = find(root, value);
     rebalance(root, balance_starting_node);
-    return nullptr;
 }
 
-void delete_AVL(node(*(&root)), int value){
+void delete_AVL(node(*(&root)), int value)
+{//produces correct outputs , still needs further testing
+ //only works on distinct values input, needs small adjustment for none-distinct values.
     if(root)
     {
-        node* to_be_deleted = find(root, value);
-        if(to_be_deleted->data = value){
-        node* balance_starting_node = delete_node_avl_version(to_be_deleted);
-        
-        if(balance_starting_node)
+        node* node_to_be_deleted = find(root,value);
+        if(node_to_be_deleted->data == value)
         {
-               rebalance(root, balance_starting_node);
-        }
-        
-        }
-        
-    }
-    
+            node* balance_starting_point = delete_node_avl_version(root,node_to_be_deleted);
+            if(balance_starting_point){
+                rebalance(root,balance_starting_point);
+            }else return;
+            
+        }else return;
+    }else return;
 }
 
 int main() {
@@ -342,16 +356,20 @@ int main() {
     cin >> size;
     cin >> value;
 
-    tree = insert_AVL(tree, value);
+    insert_AVL(tree, value);
 
     while (size > 1) {
         cin >> value;
         insert_AVL(tree, value);
         size--;
     }
-    
-   
+
     inOrder(tree);
+    cout <<"\nroot = " <<  endl << tree->data << endl;
     
+    cin >> value;
+    delete_AVL(tree,value);
+    inOrder(tree);
+    cout <<"\nroot = " <<  endl << tree->data << endl;
     return 0;
 }
