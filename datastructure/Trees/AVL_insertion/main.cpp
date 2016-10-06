@@ -15,7 +15,7 @@ typedef struct node {
 } node;
 
 template<typename T>
-T * insert(T * root, int value) {
+T * insert(T * root, int value) {// note : "only inserts distinct values."
     if (!root) {
         root = new T();
         root->data = value;
@@ -72,13 +72,13 @@ void inOrder(T *root) {
 
 }
 
-node* left_descendant(node* right_node) {
+node* left_descendant(node* right_node) {//used in the next function
     if (right_node->left)
         return left_descendant(right_node->left);
     return right_node;
 }
 
-node* right_ancestor(node* previous_node) {
+node* right_ancestor(node* previous_node) {//used in the nex() function.
     node* ancestor = previous_node->parent;
 
     while (ancestor && previous_node->data > ancestor->data)
@@ -128,7 +128,7 @@ void delete_node(node* node_to_be_deleted) {
     }
 }
 
-void rotate_right(node(*(&root)), node *to_be_rotated) {
+void rotate_right(node(*(&root)), node *to_be_rotated) {//well tested.
     if (!to_be_rotated)
         return;
     else if (!to_be_rotated->left)
@@ -159,7 +159,7 @@ void rotate_right(node(*(&root)), node *to_be_rotated) {
 
 }
 
-void rotate_left(node(*(&root)), node *to_be_rotated) {
+void rotate_left(node(*(&root)), node *to_be_rotated) {//well tested
     if (!to_be_rotated)
         return;
     else if (!to_be_rotated->right)
@@ -187,7 +187,7 @@ void rotate_left(node(*(&root)), node *to_be_rotated) {
     to_be_rotated_right->left = to_be_rotated;
 }
 
-void adjust_height(node* to_be_height_adjusted) {
+void adjust_height(node* to_be_height_adjusted) {//well tested
 
     if (to_be_height_adjusted->left && to_be_height_adjusted->right)
         to_be_height_adjusted->height = 1 + max(to_be_height_adjusted->left->height,
@@ -257,7 +257,7 @@ void rebalance_right(node(*(&root)), node* node_to_be_balanced) {
 
 void rebalance(node(*(&root)), node* balancing_starting_point) {
     node* parent = balancing_starting_point->parent;
-
+    //well tested function.
     if (balancing_starting_point->left && balancing_starting_point->right) {
         if (balancing_starting_point->left->height >
                 balancing_starting_point->right->height + 1)
@@ -276,7 +276,7 @@ void rebalance(node(*(&root)), node* balancing_starting_point) {
         rebalance_left(root, balancing_starting_point);
     }
 
-    adjust_height(balancing_starting_point);
+    adjust_height(balancing_starting_point);// to be better but it in an else statement after the above conditions.
     
     if (parent)
         rebalance(root, parent);
@@ -287,7 +287,7 @@ void rebalance(node(*(&root)), node* balancing_starting_point) {
 void insert_AVL(node(*(&root)), int value) {
     if (root)
         insert(root, value);
-    else root =  insert(root, value);
+    else root =  insert(root, value);// if tree is empty create a head .
 
     node* balance_starting_node = find(root, value);
     rebalance(root, balance_starting_node);
