@@ -208,16 +208,16 @@ void rebalance_left(node(*(&root)), node* node_to_be_balanced) {
 
             if (node_to_be_balanced_right->left->height >
                     node_to_be_balanced_right->right->height) {
-                rotate_right(root, node_to_be_balanced);
+                rotate_right(root, node_to_be_balanced_right);
                 adjust_height(node_to_be_balanced_right);
                 adjust_height(node_to_be_balanced_right->parent);
             }
         } else if (!node_to_be_balanced_right->right && node_to_be_balanced_right->left) {
-            if (node_to_be_balanced_right->left->height > 1) {
+            
                 rotate_right(root, node_to_be_balanced);
                 adjust_height(node_to_be_balanced_right);
                 adjust_height(node_to_be_balanced_right->parent);
-            }
+            
         }
 
     }
@@ -241,11 +241,11 @@ void rebalance_right(node(*(&root)), node* node_to_be_balanced) {
                 adjust_height(node_to_be_balanced_left->parent);
             }
         } else if (node_to_be_balanced_left->right && !node_to_be_balanced_left->left) {
-            if (node_to_be_balanced_left->right->height > 1) {
+            
+            
                 rotate_left(root, node_to_be_balanced_left);
                 adjust_height(node_to_be_balanced_left);
                 adjust_height(node_to_be_balanced_left->parent);
-            }
         }
 
     }
@@ -272,6 +272,7 @@ void rebalance(node(*(&root)), node* balancing_starting_point) {
                 balancing_starting_point->left->height + 1)
             rebalance_left(root, balancing_starting_point);
     } else if (!balancing_starting_point->left && balancing_starting_point->right) {
+        if(balancing_starting_point->right->height > 1)
         rebalance_left(root, balancing_starting_point);
     }
 
