@@ -128,6 +128,28 @@ void delete_node(node* node_to_be_deleted) {
     }
 }
 
+
+node* delete_node_avl_version(node* node_to_be_deleted) {
+    if (!node_to_be_deleted->right) {
+        if (node_to_be_deleted->parent->left->data == node_to_be_deleted->data) {
+            node_to_be_deleted->parent->left = node_to_be_deleted->left;
+            if (node_to_be_deleted->left)
+                node_to_be_deleted->left->parent = node_to_be_deleted->parent;
+        } else {
+            node_to_be_deleted->parent->right = node_to_be_deleted->left;
+            if (node_to_be_deleted->left)
+                node_to_be_deleted->left->parent = node_to_be_deleted->parent;
+        }
+        
+        return node_to_be_deleted->parent;
+    } else {
+        node* next_node = next(node_to_be_deleted);
+        node_to_be_deleted->data = next_node->data;
+        return delete_node_avl_version(next_node);
+
+    }
+}
+
 void rotate_right(node(*(&root)), node *to_be_rotated) {
     if (!to_be_rotated)
         return;
@@ -214,7 +236,7 @@ void rebalance_left(node(*(&root)), node* node_to_be_balanced) {
             }
         } else if (!node_to_be_balanced_right->right && node_to_be_balanced_right->left) {
             
-                rotate_right(root, node_to_be_balanced_right);
+                rotate_right(root, node_to_be_balanced);
                 adjust_height(node_to_be_balanced_right);
                 adjust_height(node_to_be_balanced_right->parent);
             
@@ -284,13 +306,32 @@ void rebalance(node(*(&root)), node* balancing_starting_point) {
 
 }
 
-void insert_AVL(node(*(&root)), int value) {
+node* insert_AVL(node(*(&root)), int value) {
     if (root)
         insert(root, value);
-    else root =  insert(root, value);
+    else return insert(root, value);
 
     node* balance_starting_node = find(root, value);
     rebalance(root, balance_starting_node);
+    return nullptr;
+}
+
+void delete_AVL(node(*(&root)), int value){
+    if(root)
+    {
+        node* to_be_deleted = find(root, value);
+        if(to_be_deleted->data = value){
+        node* balance_starting_node = delete_node_avl_version(to_be_deleted);
+        
+        if(balance_starting_node)
+        {
+               rebalance(root, balance_starting_node);
+        }
+        
+        }
+        
+    }
+    
 }
 
 int main() {
@@ -301,15 +342,16 @@ int main() {
     cin >> size;
     cin >> value;
 
-    insert_AVL(tree, value);
+    tree = insert_AVL(tree, value);
 
     while (size > 1) {
         cin >> value;
         insert_AVL(tree, value);
         size--;
     }
-
+    
+   
     inOrder(tree);
-    cout << endl << tree->data << endl;
+    
     return 0;
 }
