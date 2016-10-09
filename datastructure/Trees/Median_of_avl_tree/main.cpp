@@ -129,6 +129,47 @@ void delete_node(node* node_to_be_deleted) {
     }
 }
 
+
+
+node* delete_node_avl_version(node(*(&root)),node* node_to_be_deleted) {//works fine whiout errors, but needs more
+    //testing
+    if (!node_to_be_deleted->right) {
+        
+        if(node_to_be_deleted->parent){
+            
+        if (node_to_be_deleted->parent->left&&
+                (node_to_be_deleted->parent->left->data == 
+                node_to_be_deleted->data)) {
+            
+            node_to_be_deleted->parent->left = node_to_be_deleted->left;
+            if (node_to_be_deleted->left)
+                node_to_be_deleted->left->parent = node_to_be_deleted->parent;
+        } else {
+            node_to_be_deleted->parent->right = node_to_be_deleted->left;
+            if (node_to_be_deleted->left)
+                node_to_be_deleted->left->parent = node_to_be_deleted->parent;
+        }
+        
+        }else if(!node_to_be_deleted->parent && node_to_be_deleted->left)
+        {
+            root = node_to_be_deleted->left;
+            return nullptr;// return the parent of the deleted node
+        }
+        else if(!node_to_be_deleted->parent && !node_to_be_deleted->left)
+            return nullptr;//returns the parent of the deleted node
+        
+        return node_to_be_deleted->parent;//returns the parent of the deleted node
+
+    } else {
+        node* next_node = next_node_ptr(node_to_be_deleted);//find next element to be deleted
+        node_to_be_deleted->data = next_node->data;//replace the deleted node with its next
+        //the above line is doing replacements each time. to better make it only once. 
+       return  delete_node_avl_version(root,next_node);//delete next value (since it is now duplicate value.).
+
+    }
+}
+
+
 void rotate_right(node(*(&root)), node *to_be_rotated) {//well tested.
     if (!to_be_rotated)
         return;
@@ -277,7 +318,7 @@ void rebalance(node(*(&root)), node* balancing_starting_point) {
         rebalance_left(root, balancing_starting_point);
     }
 
-    adjust_height(balancing_starting_point);// to be better but it in an else statement after the above conditions.
+    adjust_height(balancing_starting_point);// to be better put it in an else statement after the above conditions.
     
     if (parent)
         rebalance(root, parent);
@@ -303,6 +344,26 @@ void insert_AVL(node(*(&root)), int value) {
     rebalance(root, balance_starting_node);
 }
 
+
+
+void delete_AVL(node(*(&root)), int value)
+{//produces correct outputs , still needs further testing
+ //only works on distinct values input, needs small adjustment for none-distinct values.
+    if(root)
+    {
+        node* node_to_be_deleted = find(root,value);
+        if(node_to_be_deleted->data == value)
+        {
+            node* balance_starting_point = delete_node_avl_version(root,node_to_be_deleted);
+            if(balance_starting_point){
+                rebalance(root,balance_starting_point);
+            }else return;
+            
+        }else return;
+    }else return;
+}
+
+
 int main() {
 
     node* tree = nullptr;
@@ -316,6 +377,11 @@ int main() {
         size--;
     }
 
+    inOrder(tree);
+    cout << "root  :  " << tree->data << endl;
+    
+    delete_AVL(tree,3);
+    cout << endl;
     inOrder(tree);
     cout << "root  :  " << tree->data << endl;
     return 0;
