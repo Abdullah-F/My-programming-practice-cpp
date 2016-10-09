@@ -1,5 +1,4 @@
 #include<iostream>
-#include <algorithm>
 using namespace std;
 
 typedef struct node {
@@ -22,10 +21,10 @@ T * insert(T * root, int value) {// note : "only inserts distinct values."
         root->parent = nullptr;
         root->left = nullptr;
         root->right = nullptr;
-        return root;
+        return root;//returns the root
     }
 
-    if (value > root ->data) {
+    if (value >= root ->data) {
         if (!root->right) {
             root->right = new T();
             root->right->data = value;
@@ -53,22 +52,11 @@ node* find(node* root, int value) {// if not found it returns a pointer to the a
     if (root->data == value)
         return root;
 
-    if (value > root->data && root->right)
+    if (value >= root->data && root->right)
         return find(root->right, value);
     else if (value < root->data && root->left) return find(root->left, value);
 
     return root;
-}
-
-template <class T>
-void inOrder(T *root) {
-    if (!root)
-        return;
-    inOrder(root->left);
-    cout << root->data << " ";
-    cout << root->height << " " << endl;
-    inOrder(root->right);
-
 }
 
 node* left_descendant(node* right_node) {//used in the next function
@@ -86,7 +74,8 @@ node* right_ancestor(node* previous_node) {//used in the nex() function.
     return ancestor;
 }
 
-node* next(node* current) {// returns null if the number we search for is the largest one.
+
+node* next_node_ptr(node* current) {// returns null if the number we search for is the largest one.
 
     if (current->right) {
         return left_descendant(current->right);
@@ -96,13 +85,26 @@ node* next(node* current) {// returns null if the number we search for is the la
 
 }
 
+
+template <class T>
+void inOrder(T *root) {
+    if (!root)
+        return;
+    inOrder(root->left);
+    cout << root->data << " ";
+    cout << root->height << " " << endl;
+    inOrder(root->right);
+
+}
+
+
 void rangeSearch(int min, int max, node* root) {
 
     node* next_node = find(root, min);
     while (next_node && next_node->data <= max && next_node->data >= min) {
         //we check always if the next value in the range
         cout << next_node->data << " ";
-        next_node = next(next_node);
+        next_node = next_node_ptr(next_node);
     }
 
 }
@@ -120,7 +122,7 @@ void delete_node(node* node_to_be_deleted) {
         }
 
     } else {
-        node* next_node = next(node_to_be_deleted);
+        node* next_node = next_node_ptr(node_to_be_deleted);
         node_to_be_deleted->data = next_node->data;
         delete_node(next_node);
 
@@ -284,11 +286,20 @@ void rebalance(node(*(&root)), node* balancing_starting_point) {
 }
 
 void insert_AVL(node(*(&root)), int value) {
-    if (root)
-        insert(root, value);
-    else root =  insert(root, value);// if tree is empty create a head .
-
-    node* balance_starting_node = find(root, value);
+    node* balance_starting_node;
+    if (root){
+     balance_starting_node = insert(root, value);
+    if(value >= balance_starting_node->data)
+        balance_starting_node = balance_starting_node->right;
+    else 
+        balance_starting_node = balance_starting_node->left;
+    }
+    else{
+        
+     root =  insert(root, value);// if tree is empty create a head .
+     balance_starting_node = root;
+    }
+    
     rebalance(root, balance_starting_node);
 }
 
