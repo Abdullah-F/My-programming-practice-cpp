@@ -5,7 +5,9 @@ typedef struct node {
 
     node() {
         height = 0;
+        tree_size = 0;
     }
+    int tree_size;
     int data;
     int height;
     node * parent;
@@ -49,6 +51,8 @@ T * insert(T * root, int value) {// note : "only inserts distinct values."
 }
 
 node* find(node* root, int value) {// if not found it returns a pointer to the appropriate position where it can be inserted.
+    if(!root)
+        return root;
     if (root->data == value)
         return root;
 
@@ -116,7 +120,8 @@ void inOrder(T *root) {
         return;
     inOrder(root->left);
     cout << root->data << " ";
-    cout << root->height << " " << endl;
+    cout << "height = " <<  root->height << "  " ;
+    cout <<  "rank  = "  <<rank_of_node(root) << endl;
     inOrder(root->right);
 
 }
@@ -255,14 +260,25 @@ void rotate_left(node(*(&root)), node *to_be_rotated) {//well tested
 
 void adjust_height(node* to_be_height_adjusted) {//well tested
 
-    if (to_be_height_adjusted->left && to_be_height_adjusted->right)
+    if (to_be_height_adjusted->left && to_be_height_adjusted->right){
         to_be_height_adjusted->height = 1 + max(to_be_height_adjusted->left->height,
-            to_be_height_adjusted->right->height);
-    else if (!to_be_height_adjusted->left && to_be_height_adjusted->right)
-        to_be_height_adjusted->height = 1 + to_be_height_adjusted->right->height;
-    else if (to_be_height_adjusted->left && !to_be_height_adjusted->right)
-        to_be_height_adjusted->height = 1 + to_be_height_adjusted->left->height;
-    else to_be_height_adjusted->height = 1;
+            to_be_height_adjusted->right->height);//adjust height
+        
+        to_be_height_adjusted->tree_size = 1 + to_be_height_adjusted->left->tree_size+
+                to_be_height_adjusted->right->tree_size;//adjust size
+    }
+    else if (!to_be_height_adjusted->left && to_be_height_adjusted->right){
+        to_be_height_adjusted->height = 1 + to_be_height_adjusted->right->height;//adjust height 
+        to_be_height_adjusted->tree_size = to_be_height_adjusted->height;//adjust size
+    }
+    else if (to_be_height_adjusted->left && !to_be_height_adjusted->right){
+        to_be_height_adjusted->height = 1 + to_be_height_adjusted->left->height;//adjust height
+        to_be_height_adjusted->tree_size = to_be_height_adjusted->height;//adjust size
+    }
+    else{ 
+        to_be_height_adjusted->height = 1;//set height = 1
+        to_be_height_adjusted->tree_size = to_be_height_adjusted->height;//adjust size
+    }
 }
 
 void rebalance_left(node(*(&root)), node* node_to_be_balanced) {
@@ -385,6 +401,26 @@ void delete_AVL(node(*(&root)), int value)
             
         }else return;
     }else return;
+}
+
+int rank_of_node(node* node_to_be_ranked)//works only for distinct values input
+{
+    if(!node_to_be_ranked)
+        return -1;
+    
+    node* parent = left_ancestor(node_to_be_ranked);
+    
+    
+    int node_rank  = 0;
+    if(node_to_be_ranked->left)
+        node_rank = node_to_be_ranked->left->tree_size+1;
+    else node_rank = 1;
+    
+   
+    if(parent)
+          return node_rank + rank_of_node(parent);//go to parent
+    else return node_rank-1;//to make it start ranking from zero.
+    
 }
 
 
