@@ -483,7 +483,7 @@ int main() {
         insert_AVL(tree, value);
         size--;
     }
-
+    
     inOrder(tree);
     
     

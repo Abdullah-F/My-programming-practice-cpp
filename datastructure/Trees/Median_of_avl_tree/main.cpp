@@ -5,7 +5,9 @@ typedef struct node {
 
     node() {
         height = 0;
+        tree_size = 0;
     }
+    int tree_size;
     int data;
     int height;
     node * parent;
@@ -49,6 +51,8 @@ T * insert(T * root, int value) {// note : "only inserts distinct values."
 }
 
 node* find(node* root, int value) {// if not found it returns a pointer to the appropriate position where it can be inserted.
+    if(!root)
+        return root;
     if (root->data == value)
         return root;
 
@@ -116,7 +120,8 @@ void inOrder(T *root) {
         return;
     inOrder(root->left);
     cout << root->data << " ";
-    cout << root->height << " " << endl;
+    cout << "height = " <<  root->height << "  " ;
+    cout <<  "rank  = "  << rank_of_node(root) << endl;
     inOrder(root->right);
 
 }
@@ -255,14 +260,25 @@ void rotate_left(node(*(&root)), node *to_be_rotated) {//well tested
 
 void adjust_height(node* to_be_height_adjusted) {//well tested
 
-    if (to_be_height_adjusted->left && to_be_height_adjusted->right)
+    if (to_be_height_adjusted->left && to_be_height_adjusted->right){
         to_be_height_adjusted->height = 1 + max(to_be_height_adjusted->left->height,
-            to_be_height_adjusted->right->height);
-    else if (!to_be_height_adjusted->left && to_be_height_adjusted->right)
-        to_be_height_adjusted->height = 1 + to_be_height_adjusted->right->height;
-    else if (to_be_height_adjusted->left && !to_be_height_adjusted->right)
-        to_be_height_adjusted->height = 1 + to_be_height_adjusted->left->height;
-    else to_be_height_adjusted->height = 1;
+            to_be_height_adjusted->right->height);//adjust height
+        
+        to_be_height_adjusted->tree_size = 1 + to_be_height_adjusted->left->tree_size+
+                to_be_height_adjusted->right->tree_size;//adjust size
+    }
+    else if (!to_be_height_adjusted->left && to_be_height_adjusted->right){
+        to_be_height_adjusted->height = 1 + to_be_height_adjusted->right->height;//adjust height 
+        to_be_height_adjusted->tree_size = to_be_height_adjusted->height;//adjust size
+    }
+    else if (to_be_height_adjusted->left && !to_be_height_adjusted->right){
+        to_be_height_adjusted->height = 1 + to_be_height_adjusted->left->height;//adjust height
+        to_be_height_adjusted->tree_size = to_be_height_adjusted->height;//adjust size
+    }
+    else{ 
+        to_be_height_adjusted->height = 1;//set height = 1
+        to_be_height_adjusted->tree_size = to_be_height_adjusted->height;//adjust size
+    }
 }
 
 void rebalance_left(node(*(&root)), node* node_to_be_balanced) {
@@ -387,6 +403,86 @@ void delete_AVL(node(*(&root)), int value)
     }else return;
 }
 
+int rank_of_node(node* node_to_be_ranked)//works on distinct and repeated values as well
+//well tested function
+{
+    if(!node_to_be_ranked)
+        return -1;
+    int node_rank = 1;
+    node* parent = node_to_be_ranked->parent;
+    node* temp = node_to_be_ranked;
+    
+    while (parent) {
+        if(parent->right && temp == parent->right)
+            break;
+        temp = parent;
+        parent = parent->parent;
+    }
+    
+    if(node_to_be_ranked->left)
+    {
+        node_rank = node_rank+node_to_be_ranked->left->tree_size;
+    }
+    
+    
+    node_rank = node_rank+rank_of_node(parent);
+
+   
+    return node_rank;
+}
+
+
+int select_node_by_rank(node* root , int node_rank)//well tested.
+{//returns the node value at the specified rank (index).
+    node_rank++;
+    if(!root)
+        return -1;//can't select from an empty tree.
+    if(node_rank < 1 || node_rank > root->tree_size)
+        return -1;//out of range exception.
+    
+    int node_value = -1 ,temp_rank = 0,sub_rank = 0;
+    node* temp = root;
+    
+    while(temp)
+    {
+         if(temp->left)
+               sub_rank += (temp->left->tree_size +1);
+            else sub_rank += 1;
+         temp_rank+= sub_rank;
+         
+        if(temp_rank == node_rank)
+        {
+            node_value = temp->data;
+            break;
+        }else if(node_rank > temp_rank)
+        {
+            temp = temp->right;
+            sub_rank = 0;
+        }else{
+            temp = temp->left;
+            temp_rank -= sub_rank;
+            sub_rank = 0;
+        }
+        
+        
+    }
+    
+    
+    return node_value;
+}
+
+double get_avl_median(node* root){//returns the median element of an avl tree.
+    //this method does not ckeck if the incoming root is null or not.
+ 
+    if(root->tree_size %2 != 0)
+        return select_node_by_rank(root,root->tree_size/2);
+    
+        int med1 = select_node_by_rank(root,root->tree_size/2);
+        int med2 = select_node_by_rank(root,(root->tree_size/2)-1);
+        
+        return (med1+med2)/2.0;
+}
+
 
 int main() {
 
@@ -400,11 +496,11 @@ int main() {
         insert_AVL(tree, value);
         size--;
     }
-
+    
     inOrder(tree);
-    cout << "root  :  " << tree->data << endl;
+    
+    cout << "median = " << get_avl_median(tree) << endl;
     
     
-    cout << "previous  :  " << previous_node_ptr(find(tree,1))->data << endl;
     return 0;
 }
