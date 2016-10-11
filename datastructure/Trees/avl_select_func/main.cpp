@@ -121,7 +121,7 @@ void inOrder(T *root) {
     inOrder(root->left);
     cout << root->data << " ";
     cout << "height = " <<  root->height << "  " ;
-    cout <<  "rank  = "  <<rank_of_node(root) << endl;
+    cout <<  "rank  = "  << rank_of_node(root) << endl;
     inOrder(root->right);
 
 }
@@ -432,6 +432,45 @@ int rank_of_node(node* node_to_be_ranked)//works on distinct and repeated values
 }
 
 
+int select_node_by_rank(node* root , int node_rank)//well tested.
+{//returns the node value at the specified rank (index).
+    node_rank++;
+    if(!root)
+        return -1;//can't select from an empty tree.
+    if(node_rank < 1 || node_rank > root->tree_size)
+        return -1;//out of range exception.
+    
+    int node_value = -1 ,temp_rank = 0,sub_rank = 0;
+    node* temp = root;
+    
+    while(temp)
+    {
+         if(temp->left)
+               sub_rank += (temp->left->tree_size +1);
+            else sub_rank += 1;
+         temp_rank+= sub_rank;
+         
+        if(temp_rank == node_rank)
+        {
+            node_value = temp->data;
+            break;
+        }else if(node_rank > temp_rank)
+        {
+            temp = temp->right;
+            sub_rank = 0;
+        }else{
+            temp = temp->left;
+            temp_rank -= sub_rank;
+            sub_rank = 0;
+        }
+        
+        
+    }
+    
+    
+    return node_value;
+}
+
 int main() {
 
     node* tree = nullptr;
@@ -446,7 +485,7 @@ int main() {
     }
 
     inOrder(tree);
-    cout << "root  :  " << tree->data << endl;
+    
     
     
     
