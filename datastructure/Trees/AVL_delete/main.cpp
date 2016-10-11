@@ -1,12 +1,15 @@
 #include<iostream>
 using namespace std;
 
+
 typedef struct node {
 
     node() {
         height = 0;
+        tree_size = 0;
     }
-    int data;
+    int tree_size;
+    long int data;
     int height;
     node * parent;
     node * left;
@@ -49,6 +52,8 @@ T * insert(T * root, int value) {// note : "only inserts distinct values."
 }
 
 node* find(node* root, int value) {// if not found it returns a pointer to the appropriate position where it can be inserted.
+    if(!root)
+        return root;
     if (root->data == value)
         return root;
 
@@ -68,7 +73,7 @@ node* left_descendant(node* right_node) {//used in the next function
 node* right_ancestor(node* previous_node) {//used in the nex() function.
     node* ancestor = previous_node->parent;
 
-    while (ancestor && previous_node->data > ancestor->data)
+    while (ancestor && previous_node->data >= ancestor->data)
         ancestor = ancestor->parent;
 
     return ancestor;
@@ -83,50 +88,6 @@ node* next_node_ptr(node* current) {// returns null if the number we search for 
         return right_ancestor(current);
     }
 
-}
-
-
-template <class T>
-void inOrder(T *root) {
-    if (!root)
-        return;
-    inOrder(root->left);
-    cout << root->data << " ";
-    cout << root->height << " " << endl;
-    inOrder(root->right);
-
-}
-
-
-void rangeSearch(int min, int max, node* root) {
-
-    node* next_node = find(root, min);
-    while (next_node && next_node->data <= max && next_node->data >= min) {
-        //we check always if the next value in the range
-        cout << next_node->data << " ";
-        next_node = next_node_ptr(next_node);
-    }
-
-}
-
-void delete_node(node* node_to_be_deleted) {
-    if (!node_to_be_deleted->right) {
-        if (node_to_be_deleted->parent->left->data == node_to_be_deleted->data) {
-            node_to_be_deleted->parent->left = node_to_be_deleted->left;
-            if (node_to_be_deleted->left)
-                node_to_be_deleted->left->parent = node_to_be_deleted->parent;
-        } else {
-            node_to_be_deleted->parent->right = node_to_be_deleted->left;
-            if (node_to_be_deleted->left)
-                node_to_be_deleted->left->parent = node_to_be_deleted->parent;
-        }
-
-    } else {
-        node* next_node = next_node_ptr(node_to_be_deleted);
-        node_to_be_deleted->data = next_node->data;
-        delete_node(next_node);
-
-    }
 }
 
 
@@ -153,10 +114,14 @@ node* delete_node_avl_version(node(*(&root)),node* node_to_be_deleted) {//works 
         }else if(!node_to_be_deleted->parent && node_to_be_deleted->left)
         {
             root = node_to_be_deleted->left;
+            root->parent = nullptr;
             return nullptr;// return the parent of the deleted node
         }
         else if(!node_to_be_deleted->parent && !node_to_be_deleted->left)
-            return nullptr;//returns the parent of the deleted node
+        {
+            root = nullptr;
+            return nullptr;//returns the parent of the deleted node  
+        } 
         
         return node_to_be_deleted->parent;//returns the parent of the deleted node
 
@@ -231,14 +196,25 @@ void rotate_left(node(*(&root)), node *to_be_rotated) {//well tested
 
 void adjust_height(node* to_be_height_adjusted) {//well tested
 
-    if (to_be_height_adjusted->left && to_be_height_adjusted->right)
+    if (to_be_height_adjusted->left && to_be_height_adjusted->right){
         to_be_height_adjusted->height = 1 + max(to_be_height_adjusted->left->height,
-            to_be_height_adjusted->right->height);
-    else if (!to_be_height_adjusted->left && to_be_height_adjusted->right)
-        to_be_height_adjusted->height = 1 + to_be_height_adjusted->right->height;
-    else if (to_be_height_adjusted->left && !to_be_height_adjusted->right)
-        to_be_height_adjusted->height = 1 + to_be_height_adjusted->left->height;
-    else to_be_height_adjusted->height = 1;
+            to_be_height_adjusted->right->height);//adjust height
+        
+        to_be_height_adjusted->tree_size = 1 + to_be_height_adjusted->left->tree_size+
+                to_be_height_adjusted->right->tree_size;//adjust size
+    }
+    else if (!to_be_height_adjusted->left && to_be_height_adjusted->right){
+        to_be_height_adjusted->height = 1 + to_be_height_adjusted->right->height;//adjust height 
+        to_be_height_adjusted->tree_size = to_be_height_adjusted->height;//adjust size
+    }
+    else if (to_be_height_adjusted->left && !to_be_height_adjusted->right){
+        to_be_height_adjusted->height = 1 + to_be_height_adjusted->left->height;//adjust height
+        to_be_height_adjusted->tree_size = to_be_height_adjusted->height;//adjust size
+    }
+    else{ 
+        to_be_height_adjusted->height = 1;//set height = 1
+        to_be_height_adjusted->tree_size = to_be_height_adjusted->height;//adjust size
+    }
 }
 
 void rebalance_left(node(*(&root)), node* node_to_be_balanced) {
@@ -362,6 +338,21 @@ void delete_AVL(node(*(&root)), int value)
         }else return;
     }else return;
 }
+
+    
+
+
+template <class T>
+void inOrder(T *root) {
+    if (!root)
+        return;
+    inOrder(root->left);
+    cout << root->data << " ";
+    cout << root->height << " " << endl;
+    inOrder(root->right);
+
+}
+
 
 
 int main() {
