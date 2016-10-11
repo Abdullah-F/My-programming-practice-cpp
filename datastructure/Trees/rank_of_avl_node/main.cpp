@@ -403,24 +403,32 @@ void delete_AVL(node(*(&root)), int value)
     }else return;
 }
 
-int rank_of_node(node* node_to_be_ranked)//works only for distinct values input
+int rank_of_node(node* node_to_be_ranked)//works on distinct and repeated values as well
+//well tested function
 {
     if(!node_to_be_ranked)
         return -1;
+    int node_rank = 1;
+    node* parent = node_to_be_ranked->parent;
+    node* temp = node_to_be_ranked;
     
-    node* parent = left_ancestor(node_to_be_ranked);
+    while (parent) {
+        if(parent->right && temp == parent->right)
+            break;
+        temp = parent;
+        parent = parent->parent;
+    }
     
-    
-    int node_rank  = 0;
     if(node_to_be_ranked->left)
-        node_rank = node_to_be_ranked->left->tree_size+1;
-    else node_rank = 1;
+    {
+        node_rank = node_rank+node_to_be_ranked->left->tree_size;
+    }
     
+    
+    node_rank = node_rank+rank_of_node(parent);
+
    
-    if(parent)
-          return node_rank + rank_of_node(parent);//go to parent
-    else return node_rank-1;//to make it start ranking from zero.
-    
+    return node_rank;
 }
 
 
@@ -441,6 +449,6 @@ int main() {
     cout << "root  :  " << tree->data << endl;
     
     
-    cout << "previous  :  " << previous_node_ptr(find(tree,1))->data << endl;
+    
     return 0;
 }
