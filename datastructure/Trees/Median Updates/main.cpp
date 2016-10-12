@@ -29,6 +29,9 @@ string TrimString(string str) {
     return str;
 }
 int main() {
+    /*
+     idea : we keep tracking the median each time we add elements to the set
+     */
     multiset<long int> mySet;
     char op;
     long int val, erased_elements, size, med1, med2, n;
@@ -46,37 +49,41 @@ int main() {
             mySet.insert(val);
 
             if (mySet.size() == 1)
-                median_itr = mySet.begin();
-            else if (mySet.size() % 2 != 0 && val < *median_itr)
-                median_itr--;
-            else if (mySet.size() % 2 == 0 && val >= *median_itr)
-                median_itr++;
+                median_itr = mySet.begin();//median is the only element in the set
+            else if (mySet.size() % 2 != 0 && val < *median_itr)//adding element smaller than the median
+                median_itr--;//median goes back one step (if the new size is odd)
+            else if (mySet.size() % 2 == 0 && val >= *median_itr)//adding >= or equal element
+                median_itr++;//the median goes forward one step (if the new size is even)
         }else if(op == 'r')
         {
             temp_itr = median_itr;
             temp_itr1 = mySet.find(val);
             if(mySet.empty()){
-                cout << "Wrong!" << endl;
+                cout << "Wrong!" << endl;//can't delete from an empty set.
                 n--;
                 continue;
             }
-            else if((mySet.size()-1) %2 != 0 && temp_itr1 == median_itr)
-                    median_itr--;
-            else if((mySet.size()-1) %2 != 0 && val > *median_itr)
-                median_itr--;
-            else if((mySet.size()-1) %2 != 0 && val == *median_itr)
+            else if((mySet.size()-1) %2 != 0 && temp_itr1 == median_itr)//deleting the median itself.
+                    median_itr--;//median goes back one step (if the new size is odd)
+            else if((mySet.size()-1) %2 != 0 && val > *median_itr)//deleting an element greater than median
+                median_itr--;//median goes back one step (if the new size is odd)
+            else if((mySet.size()-1) %2 != 0 && val == *median_itr)//deleting an element equal the median,
+                //but is not the median
             {
                 if(distance(temp_itr1,median_itr) <= 0)
-                    median_itr--;
+                    median_itr--;//median goes back one step (if the new size is odd and deleted element 
+                //position is after the median.)
             }
-            else if((mySet.size()-1) %2 == 0 && val < *median_itr)
-                median_itr++;
-            else if((mySet.size()-1) %2 == 0 && temp_itr1 == median_itr)
-                    median_itr++;
+            else if((mySet.size()-1) %2 == 0 && val < *median_itr)//if deleted elent is less then the median
+                median_itr++;//the median goes forward (if the new size is even)
+            else if((mySet.size()-1) %2 == 0 && temp_itr1 == median_itr)//deleting the median itself.
+                    median_itr++;//the median goes forward (if the new size is even)
             else if((mySet.size()-1) %2 == 0 && val == *median_itr)
             {
-                if(distance(temp_itr1,median_itr) >= 0)
-                    median_itr++;
+                if(distance(temp_itr1,median_itr) >= 0)//deleting an element equal the median,
+                //but is not the median
+                    median_itr++;//median goes forward one step (if the new size is odd and deleted element 
+                //position is before the median.)
             }            
              if(temp_itr1 == mySet.end())
                 median_itr = temp_itr;
