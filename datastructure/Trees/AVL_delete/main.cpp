@@ -353,6 +353,10 @@ void inOrder(T *root) {
 
 }
 
+int t_size(node *u) {
+if (u == nullptr) return 0;
+return 1 + t_size(u->left) + t_size(u->right);
+}
 
 
 int main() {
@@ -374,6 +378,6 @@ int main() {
     delete_AVL(tree,3);
     cout << endl;
     inOrder(tree);
-    cout << "root  :  " << tree->data << endl;
+    cout << "root  :  " << t_size(tree) << endl;
     return 0;
 }
