@@ -2,6 +2,8 @@
  * C++ program to Implement AVL Tree
  */
 #include<iostream>
+#include<queue>
+
 using namespace std;
 
 /*
@@ -58,6 +60,39 @@ private:
             to_be_height_adjusted->tree_size = to_be_height_adjusted->height; //adjust size
         }
     }
+
+    void dispaly_LevelOrder(queue<node *>& tree_qu) {
+        if (tree_qu.empty())
+            return;
+        node* temp = tree_qu.front();
+        tree_qu.pop();
+        cout << temp->data << " ";
+        if (temp->left)
+            tree_qu.push(temp->left);
+        if (temp->right)
+            tree_qu.push(temp->right);
+
+        dispaly_LevelOrder(tree_qu);
+    }
+
+    template<typename T>
+    void printLeft(T * root) {
+        if (!root)
+            return;
+
+        printLeft(root->left);
+        cout << root->data << " ";
+    }
+
+    template<typename T>
+    void printRight(T * root) {
+        if (!root)
+            return;
+
+        printRight(root->right);
+        cout << root->data << " ";
+    }
+
 
 public:
 
@@ -264,6 +299,44 @@ public:
 
     }
 
+    void LevelOrder(node * root) {
+        if (root) {
+            queue<node *> level_order_qu;
+            level_order_qu.push(root);
+            dispaly_LevelOrder(level_order_qu);
+        }
+
+    }
+
+    void postOrder(node *root) {
+        if (!root)
+            return;
+        postOrder(root->left);
+        postOrder(root->right);
+        cout << root->data << " ";
+    }
+
+    void preOrder(node *root) {
+        if (!root)
+            return;
+        cout << root->data << " ";
+        preOrder(root->left);
+        preOrder(root->right);
+
+    }
+
+    template<typename T>
+    void top_view(T * root) {
+        if (!root)
+            return;
+
+        printLeft(root->left);
+        printRight(root->right);
+        cout << root->data << " ";
+
+
+    }
+
     node* left_descendant(node* right_node) {//used in the next function
         if (right_node->left)
             return left_descendant(right_node->left);
@@ -287,6 +360,104 @@ public:
             return right_ancestor(current);
         }
 
+    }
+
+    node* left_ancestor(node* previous_node) {//used in the previous_node_ptr function.
+        node* ancestor = previous_node->parent;
+
+        while (ancestor && previous_node->data <= ancestor->data)
+            ancestor = ancestor->parent;
+
+        return ancestor;
+    }
+
+    node* right_descendant(node* left_node) {//used in the previous_node_ptr function
+        if (left_node->right)
+            return right_descendant(left_node->right);
+        return left_node;
+    }
+
+    node* previous_node_ptr(node* current) {
+        if (current->left) {
+            return right_descendant(current->left);
+        } else {
+            return left_ancestor(current);
+        }
+
+    }
+
+    void rangeSearch(int min, int max, node* root) {
+
+        node* next_node = find(root, min);
+        while (next_node && next_node->data <= max && next_node->data >= min) {
+            //we check always if the next value in the range
+            cout << next_node->data << " ";
+            next_node = next_node_ptr(next_node);
+        }
+
+    }
+
+    int rank_of_node(node* node_to_be_ranked)//works on distinct and repeated values as well
+    //well tested function
+    {
+        if (!node_to_be_ranked)
+            return -1;
+        int node_rank = 1;
+        node* parent = node_to_be_ranked->parent;
+        node* temp = node_to_be_ranked;
+
+        while (parent) {
+            if (parent->right && temp == parent->right)
+                break;
+            temp = parent;
+            parent = parent->parent;
+        }
+
+        if (node_to_be_ranked->left) {
+            node_rank = node_rank + node_to_be_ranked->left->tree_size;
+        }
+
+
+        node_rank = node_rank + rank_of_node(parent);
+
+
+        return node_rank;
+    }
+
+    int select_node_by_rank(node* root, int node_rank)//well tested.
+    {//returns the node value at the specified rank (index).
+        node_rank++;
+        if (!root)
+            return -1; //can't select from an empty tree.
+        if (node_rank < 1 || node_rank > root->tree_size)
+            return -1; //out of range exception.
+
+        int node_value = -1, temp_rank = 0, sub_rank = 0;
+        node* temp = root;
+
+        while (temp) {
+            if (temp->left)
+                sub_rank += (temp->left->tree_size + 1);
+            else sub_rank += 1;
+            temp_rank += sub_rank;
+
+            if (temp_rank == node_rank) {
+                node_value = temp->data;
+                break;
+            } else if (node_rank > temp_rank) {
+                temp = temp->right;
+                sub_rank = 0;
+            } else {
+                temp = temp->left;
+                temp_rank -= sub_rank;
+                sub_rank = 0;
+            }
+
+
+        }
+
+
+        return node_value;
     }
 
     void delete_avl_node(int value, node* root) {
@@ -326,7 +497,32 @@ public:
     }
 
 
+    // this code is based on the assumption  that v1 , v2 surly exist in the tree.
 
+    template<typename T>
+    T* lowest_common_ancentor(T* root, int v1, int v2) {
+        T *ptr1 = root, *ptr2 = root, *ancentor = nullptr;
+
+        while (ptr1 && ptr2) {
+            if (ptr1 == ptr2) {
+                ancentor = ptr1;
+            }
+
+            if (ptr1->data == v1 || ptr2->data == v2)
+                break;
+            if (v1 > ptr1->data)
+                ptr1 = ptr1->right;
+            else ptr1 = ptr1->left;
+
+            if (v2 > ptr2->data)
+                ptr2 = ptr2->right;
+            else ptr2 = ptr2->left;
+
+
+        }
+
+        return ancentor;
+    }
 
 };
 
@@ -342,9 +538,9 @@ int main() {
 
     tree.inOrder(tree.get_root());
     cout << "tree size : " << tree.get_tree_size() << endl;
-    size = 1;
 
-    tree.inOrder(tree.get_root());
-    cout << "tree size : " << tree.get_tree_size() << endl;
+
+    tree.LevelOrder(tree.get_root());
+
     return 0;
 }
