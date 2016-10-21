@@ -375,7 +375,7 @@ int main() {
     inOrder(tree);
     cout << "root  :  " << tree->data << endl;
     
-    delete_AVL(tree,3);
+    delete_AVL(tree,5);
     cout << endl;
     inOrder(tree);
     cout << "root  :  " << t_size(tree) << endl;
