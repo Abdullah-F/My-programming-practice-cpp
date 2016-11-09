@@ -24,21 +24,21 @@ private:
     int maxSize;
 
     Var parent(int index) {
-        return index / 2;
+        return (index-1) / 2;
     }
 
     Var leftChild(int index) {
-        return 2 * index;
+        return (2 * index)+1;
     }
 
     Var rightChild(int index) {
-        return (2 * index) + 1;
+        return (2 * index) + 2;
     }
 
     void siftUp(int index) {
         int parentIndex = parent(index);
 
-        while (index > 1 &&
+        while (index > 0 &&
                 (maxTreapArray[parentIndex] < maxTreapArray[index])) {
 
             swap(maxTreapArray[parentIndex], maxTreapArray[index]);
@@ -69,9 +69,9 @@ public:
 
     MaxTreap(Var arr_size) {
         maxTreapArray = new Var(arr_size);
-        size = 0;
+        size = -1;
         maxSize = arr_size;
-        maxTreapArray[0] = -1;
+        
     }
 
     int getSize() {
@@ -84,21 +84,21 @@ public:
 
     Var getMaxElement() {
         if (size > 0)
-            return maxTreapArray[1];
-        return maxTreapArray[0];
+            return maxTreapArray[0];
+        return -1;
 
     }
 
     Var extractMax() {
-        if (size > 0) {
-            Var result = maxTreapArray[1];
-            maxTreapArray[1] = maxTreapArray[size];
+        if (size > -1) {
+            Var result = maxTreapArray[0];
+            maxTreapArray[0] = maxTreapArray[size];
             size = size - 1;
-            siftDown(1);
+            siftDown(0);
             return result;
         }
 
-        return -1;
+        return -1;//should return value better than -1 .
     }
 
     void insert(Var newNode) {
@@ -111,12 +111,12 @@ public:
         siftUp(size); //sift up the added node
     }
 
-    Var remove(int index) {
-        if (size > 0) {
-            if (index > 0) {
-                maxTreapArray[index] = maxTreapArray[1] + 10;
-                siftUp(index);
-                return extractMax();
+    Var remove(int index) {//increases the priority of the element to make it maximum then removes it.
+        if (size > -1) {
+            if (index > -1) {
+                maxTreapArray[index] = maxTreapArray[0] + 10;
+                siftUp(index);//make it root
+                return extractMax();//remove number from queue.
             }
         }
 
@@ -134,11 +134,12 @@ public:
     }
 
     Var &operator[](int index) {
-        if (index > size || index < 1) {
+        if (index > size || index < 0 || size == -1) {
             cout << "Index out of bounds" << endl;
             // return first element.
-            return maxTreapArray[0];
+            return (index = -1);
         }
+        
         return maxTreapArray[index];
     }
 
@@ -158,13 +159,13 @@ int main() {
         myTreap.insert(value);
         size--;
     }
-    while (myTreap.getSize() != 0) {
-        cout << "Max " << myTreap.extractMax() << endl;
-        cout << "size  " << myTreap.getSize() << endl;
-    }
+//    while (myTreap.getSize() != -1) {
+//        cout << "Max " << myTreap.extractMax() << endl;
+//       // cout << "size  " << myTreap.getSize() << endl;
+//    }
 
     cout << endl;
-    for (int i = 1; i <= myTreap.getSize(); i++) {
+    for (int i = 0; i <= myTreap.getSize(); i++) {
         cout << myTreap[i] << " ";
     }
     cout << endl;
